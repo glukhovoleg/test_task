@@ -1,0 +1,32 @@
+version: '3.7'
+services:
+    php:
+        build:
+            context: ./docker/php/
+            args:
+                WORKDIR: ${WORKDIR}
+        volumes:
+          - ./app:${WORKDIR}
+          - ./docker/php/php.ini:/usr/local/etc/php/php.ini:ro
+          - ./logs/php-error.log:/var/log/error.log
+          - ./logs/php-access.log:/var/log/access.log
+        working_dir: ${WORKDIR}
+        container_name: ${PHP_HOST}
+    db:
+        image: postgres:alpine
+        ports:
+          - '${POSTGRES_PORT}:${POSTGRES_PORT}'
+        restart: always
+        env_file: 
+          - ./.env
+        container_name: ${POSTGRES_HOST}
+
+    rabbit-mq:
+        image: rabbitmq:management-alpine
+        hostname: ${RABBITMQ_HOST}
+        ports:
+          - '${RABBITMQ_PORT_ADMIN}:${RABBITMQ_PORT_ADMIN}'
+          - '${RABBITMQ_PORT}:${RABBITMQ_PORT}'
+        env_file: 
+          - ./.env
+        container_name: ${RABBITMQ_HOST}
