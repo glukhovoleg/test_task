@@ -13,7 +13,8 @@ class User
 {
     /**
      * @ORM\Id()
-     * @ORM\GeneratedValue(strategy="NONE")
+     * @ORM\GeneratedValue(strategy="CUSTOM")
+     *  @ORM\CustomIdGenerator(class="App\Doctrine\CustomIdGenerator")
      * @ORM\Column(type="string", length=10)
      * @Assert\NotBlank(
      *     message = "id must be not blank",
@@ -79,13 +80,6 @@ class User
     public function getId(): ?string
     {
         return $this->id;
-    }
-
-    public function setId(string $id): self
-    {
-        $this->id = $id;
-
-        return $this;
     }
 
     public function getName(): ?string

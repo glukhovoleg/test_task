@@ -33,7 +33,6 @@ class AddUserController extends AbstractController implements ConsumerInterface
         $response = json_decode($msg->body, true);
 
         $action = $response['action'] ?? "";
-        $id = $response['id'] ?? "";
         $name = $response['name'] ?? "";
         $email = $response['email'] ?? "";
         $location = $response['location'] ?? "";
@@ -43,7 +42,6 @@ class AddUserController extends AbstractController implements ConsumerInterface
         $user=new User();
 
         if ($action!="add_user") $errors['action']="wrong action";
-        $user->setId($id);
         $user->setName($name);
         $user->setEmail($email);
         $user->setLocation($location);
