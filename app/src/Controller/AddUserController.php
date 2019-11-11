@@ -9,9 +9,15 @@ use Symfony\Component\Validator\Validation;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 use PhpAmqpLib\Message\AMQPMessage;
 use Symfony\Component\Dotenv\Dotenv;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 class AddUserController extends AbstractController implements ConsumerInterface
 {
+    private $rootPath;
+
+    public function __construct(KernelInterface $kernel){
+        $this->rootPath = $kernel->getProjectDir();
+    }
 
     public function validate_user($user) {
         $validator = Validation::createValidator();
@@ -31,7 +37,6 @@ class AddUserController extends AbstractController implements ConsumerInterface
 
     public function execute(AMQPMessage $msg){
         $response = json_decode($msg->body, true);
-
         $action = $response['action'] ?? "";
         $name = $response['name'] ?? "";
         $email = $response['email'] ?? "";
@@ -69,7 +74,7 @@ class AddUserController extends AbstractController implements ConsumerInterface
 
     public function reply_manual($msg,$exchange,$queue) {
         $dotenv = new Dotenv();
-        $dotenv->load('/var/www/app/.env');
+        $dotenv->load($this->rootPath.'/.env');
         $connection = new AMQPStreamConnection($_ENV['RABBITMQ_HOST'], $_ENV['RABBITMQ_PORT'], $_ENV['RABBITMQ_DEFAULT_USER'], $_ENV['RABBITMQ_DEFAULT_PASS'], $_ENV['RABBITMQ_DEFAULT_VHOST']);
         $channel = $connection->channel();
         $channel->queue_declare($queue, false, true, false, false);
