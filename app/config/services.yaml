@@ -40,8 +40,8 @@ old_sound_rabbit_mq:
         add_user:
             connection:       default
             exchange_options:
-                name: 'add_user'
+                name: '%env(RABBITMQ_EXCHANGE_NAME)%'
                 type: direct
             queue_options:
-                name: 'add_user_queue'
+                name: '%env(RABBITMQ_QUEUE_NAME)%'
             callback:  add_user_service
