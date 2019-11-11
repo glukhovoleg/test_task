@@ -28,6 +28,9 @@ services:
 
     add_user_service:
         class: App\Controller\AddUserController
+        arguments: ['@reply_to_service']
+    reply_to_service:
+        class: App\Controller\ReplyController
 
 old_sound_rabbit_mq:
     connections:

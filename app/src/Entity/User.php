@@ -14,18 +14,9 @@ class User
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue(strategy="CUSTOM")
-     *  @ORM\CustomIdGenerator(class="App\Doctrine\CustomIdGenerator")
+     * @ORM\CustomIdGenerator(class="App\Doctrine\CustomIdGenerator")
      * @ORM\Column(type="string", length=10)
-     * @Assert\NotBlank(
-     *     message = "id must be not blank",
-     * )
-     * @Assert\NotNull(
-     *     message = "id must be not null",
-     * )
-     * @Assert\Length(
-     *      max = 10,
-     *      maxMessage = "id cannot be longer than {{ limit }} characters"
-     * )
+     *
      */
     private $id;
 

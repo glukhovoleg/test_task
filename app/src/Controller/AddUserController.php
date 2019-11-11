@@ -5,24 +5,22 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Entity\User;
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
-use Symfony\Component\Validator\Validation;
-use PhpAmqpLib\Connection\AMQPStreamConnection;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use PhpAmqpLib\Message\AMQPMessage;
-use Symfony\Component\Dotenv\Dotenv;
-use Symfony\Component\HttpKernel\KernelInterface;
 
 class AddUserController extends AbstractController implements ConsumerInterface
 {
-    private $rootPath;
 
-    public function __construct(KernelInterface $kernel){
-        $this->rootPath = $kernel->getProjectDir();
+    private $reply;
+    private $validator;
+
+    public function __construct(ReplyController $reply,ValidatorInterface $validator){
+        $this->reply=$reply;
+        $this->validator=$validator;
     }
 
     public function validate_user($user) {
-        $validator = Validation::createValidator();
-        $errors = $validator->validate($user);
-
+        $errors = $this->validator->validate($user);
         if (count($errors) > 0) {
             $formattedErrors = [];
             for ($i = 0; $i < $errors->count(); $i++) {
@@ -69,18 +67,8 @@ class AddUserController extends AbstractController implements ConsumerInterface
             $response["error_code"]=0;
         }
 
-        $this->reply_manual($response,$reply_to['exchange'],$reply_to['queue']);
+        $this->reply->send_message($response,$reply_to['exchange'],$reply_to['queue']);
+
     }
 
-    public function reply_manual($msg,$exchange,$queue) {
-        $dotenv = new Dotenv();
-        $dotenv->load($this->rootPath.'/.env');
-        $connection = new AMQPStreamConnection($_ENV['RABBITMQ_HOST'], $_ENV['RABBITMQ_PORT'], $_ENV['RABBITMQ_DEFAULT_USER'], $_ENV['RABBITMQ_DEFAULT_PASS'], $_ENV['RABBITMQ_DEFAULT_VHOST']);
-        $channel = $connection->channel();
-        $channel->queue_declare($queue, false, true, false, false);
-        $channel->exchange_declare($exchange, 'direct', false, true, false);
-        $channel->queue_bind($queue, $exchange);
-        $message = new AMQPMessage(json_encode($msg), array('content_type' => 'application/json', 'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT));
-        $channel->basic_publish($message, $exchange);
-    }
 }
